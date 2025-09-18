@@ -46,11 +46,12 @@ from datetime import datetime
 # MAGIC   <li>p = player</li>
 # MAGIC   <li>s = state</li>
 # MAGIC   <li>c = country</li>
-# MAGIC   <li>source = Source (Afiliadores e Influencers)</li>
-# MAGIC   <li>0 = DWBPLAY_PY</li>
-# MAGIC   <li>1 = DWBPLAY_SF</li>
-# MAGIC   <li>2 = DWBPLAY_CABA</li>
-# MAGIC   <li>3 = DWBPLAY_CORDOBA</li>
+# MAGIC   <li>source = Source</li>
+# MAGIC   <li>0 = DW0</li>
+# MAGIC   <li>1 = DW1</li>
+# MAGIC   <li>2 = DW2</li>
+# MAGIC   <li>3 = DW3</li>
+# MAGIC   <li>46 = DW Nuevo Migracion</li>
 # MAGIC </ul>
 
 # COMMAND ----------
@@ -60,7 +61,7 @@ from datetime import datetime
 # MAGIC <p> Descripción: 
 # MAGIC <ol>
 # MAGIC   <li>Establece la conexión al STG1 del Data Lake.</li>
-# MAGIC   <li>Se definen los paths de los archivos parquet "Player", "State" y "Country" para cada Base de Datos DWBPLAY_PY, DWBPLAY_SF, DWBPLAY_CABA y DWBPLAY_CORDOBA.</li>
+# MAGIC   <li>Se definen los paths de los archivos parquet "Player", "State" y "Country" para cada Base de Datos DW.</li>
 # MAGIC   <li>Luego se leen los archivos parquet para crear los dataframes en formato PySpark.</li>
 # MAGIC </ol>
 
@@ -68,40 +69,40 @@ from datetime import datetime
 
 # ALIRA
   # Get State
-df_s0 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_py/OGP/state")
-df_s1 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_sf/OGP/state")
-df_s2 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_caba/OGP/state")
-df_s3 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_cordoba/OGP/state")
+df_s0 = spark.read.parquet("/path/DW0/state")
+df_s1 = spark.read.parquet("/path/DW1/state")
+df_s2 = spark.read.parquet("/path/DW2/state")
+df_s3 = spark.read.parquet("/path/DW3/state")
   # Get Country
-df_c0 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_py/OGP/country")
-df_c1 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_sf/OGP/country")
-df_c2 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_caba/OGP/country")
-df_c3 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_cordoba/OGP/country")
+df_c0 = spark.read.parquet("/path/DW0/country")
+df_c1 = spark.read.parquet("/path/DW1/country")
+df_c2 = spark.read.parquet("/path/DW2/country")
+df_c3 = spark.read.parquet("/path/DW3/country")
   # Get Player
-df_p0 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_py/OGP/player")
-df_p1 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_sf/OGP/player")
-df_p2 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_caba/OGP/player")
-df_p3 = spark.read.parquet("/Volumes/boldtproddatalake/boldtdatalake/dwbplay_cordoba/OGP/player")
+df_p0 = spark.read.parquet("/path/DW0/player")
+df_p1 = spark.read.parquet("/path/DW1/player")
+df_p2 = spark.read.parquet("/path/DW2/player")
+df_p3 = spark.read.parquet("/path/DW3/player")
 
   # Get Source (Afiliadores e Influencers)
-df_source = spark.read.table("entprod_mdn.bplay.source")
+df_source = spark.read.table("path.productivo.source")
 # df_source = spark.read.table("entprod_mdn.default.source")
 
     #Get Vips
-df_vips = spark.read.csv('/Volumes/entproddatalake/default/mdn_bplay/Tablas_CSV/Vips.csv', header=True, inferSchema=True, sep=';')
+df_vips = spark.read.csv('/path/document/Tablas_CSV/Vips.csv', header=True, inferSchema=True, sep=';')
 
 try:
   # << GT >>
     #Get Users GT
-  df_usr46 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/bplaybet_arg/dbo/users').filter(col('bookmaker_id').isin(13, 46, 88))
+  df_usr46 = spark.read.parquet('/path/DWN/users')
     #Get Cities GT
-  df_cts46 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/bplaybet_arg/dbo/cities')
+  df_cts46 = spark.read.parquet('/path/DWN/cities')
     #Get States GT
-  df_sts46 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/bplaybet_arg/dbo/states')
+  df_sts46 = spark.read.parquet('/path/DWN/states')
     #Get Countries GT
-  df_ctr46 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/bplaybet_arg/dbo/countries')
-    ### Switch Carga GT Parana & Jujuy
-  bl_Carga_GT = True
+  df_ctr46 = spark.read.parquet('/path/DWN/countries')
+    ### Switch Carga Nuevo DataWarehouse
+  bl_Carga_DWN = True
 
 except Exception as e:
   print(f"No se pudieron leer las tablas de GT: {e}")
@@ -120,10 +121,10 @@ print(type(PROD))
 # COMMAND ----------
 
 #Path PRD del Delta Table Player
-delta_table_Player_prd = 'entprod_mdn.bplay.player'
+delta_table_Player_prd = 'path.productivo.player'
 
 #Path DEV del Delta Table Player
-delta_table_Player_dev = 'entprod_mdn.default.player'
+delta_table_Player_dev = 'path.desarrollo.player'
 
 #   Switch PROD/DEV
 if PROD:
@@ -135,7 +136,7 @@ else:
 try:
     # Intentar leer la tabla Delta
     df_origen = spark.read.table(delta_table_Player)
-    count = df_origen.select("partner_player_id").count()
+    count = df_origen.select("id").count()
 
     # Validar la tabla AyP
     if count > 0:
@@ -154,7 +155,7 @@ except Exception as e:
 # COMMAND ----------
 
 # Definir los datos
-data = [(46, 460), (13, 130), (88, 256)]
+data = [(11, 110), (12, 120), (13, 999)]
 
 # Definir los nombres de las columnas
 columns = ["id", "partner_id"]
@@ -294,7 +295,7 @@ def Create_Player(p, s, c, af):
 
 # COMMAND ----------
 
-def Create_Player_GT(u, c, s, cy, af, prn):
+def Create_Player_DWN(u, c, s, cy, af, prn):
     u = u.withColumn("created_at", to_timestamp(expr("created_at - INTERVAL 3 HOURS"))).withColumn("updated_at", to_timestamp(expr("updated_at - INTERVAL 3 HOURS")))
     # u = u.filter((col("local_register") == '0') & (col("is_backoffice") == '0') & (col("is_services") == '0'))
     u = u.withColumn("edad", floor(datediff(current_date(), u["birth_date"]) / 365.25))
@@ -388,7 +389,7 @@ def Create_Player_GT(u, c, s, cy, af, prn):
 
 # COMMAND ----------
 
-def Create_Player_GT_Migra(u, c, s, cy, af, prn):
+def Create_Player_DWN_Migracion(u, c, s, cy, af, prn):
     u = u.withColumn("created_at", to_timestamp(expr("created_at - INTERVAL 3 HOURS"))).withColumn("updated_at", to_timestamp(expr("updated_at - INTERVAL 3 HOURS")))
     u = u.filter((col("local_register") == '0') & (col("is_backoffice") == '0') & (col("is_services") == '0'))
     u = u.withColumn("edad", floor(datediff(current_date(), u["birth_date"]) / 365.25))
@@ -814,16 +815,16 @@ df_player3 = Create_Player(df_p3, df_s3, df_c3, df_source)
 
 if bl_Carga_GT:
     # BPLAYBET_ARG
-    df_players46_GT = Create_Player_GT(df_usr46, df_cts46, df_sts46, df_ctr46, df_source, df_partner_Migra)
+    df_players46_GT = Create_Player_DWN(df_usr46, df_cts46, df_sts46, df_ctr46, df_source, df_partner_Migra)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Actualización de Jugadores GT MZA
+# MAGIC ### Actualización de Jugadores DWN Migracion
 
 # COMMAND ----------
 
-# Paso 1: Select Jugadores MZA
+# Paso 1: Select Jugadores Migracion
 df_p88 = df_players46_GT.filter(col('partner_id') == 256)
 
 ##
@@ -965,7 +966,7 @@ print(delta_table_Player)
 # COMMAND ----------
 
 from pyspark.sql.functions import count
-df_p_duplicados = df_Player_f.groupBy('partner_player_id').agg(count('*').alias('count')).filter(col('count') > 1).select('partner_player_id')
+df_p_duplicados = df_Player_f.groupBy('id').agg(count('*').alias('count')).filter(col('count') > 1).select('id')
 
 # Paso 2: Extraer los valores duplicados como una lista
 ids_duplicados = [row["partner_player_id"] for row in df_p_duplicados.collect()]
@@ -994,26 +995,26 @@ df_Player.write \
 # COMMAND ----------
 
 ## Diccionario Player
-  #Get DWBPLAY_PY
-df_ps0 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_py/OGP/player_s_name')
-df_pt0 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_py/OGP/player_t_name')
-df_g0 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_py/OGP/gender_name')
-df_pn0 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_py/OGP/partner')
-  #Get DWBPLAY_SF
-df_ps1 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_sf/OGP/player_s_name')
-df_pt1 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_sf/OGP/player_t_name')
-df_g1 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_sf/OGP/gender_name')
-df_pn1 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_sf/OGP/partner')
-  #Get DWBPLAY_CABA
-df_ps2 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_caba/OGP/player_s_name')
-df_pt2 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_caba/OGP/player_t_name')
-df_g2 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_caba/OGP/gender_name')
-df_pn2 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_caba/OGP/partner')
-  #Get DWBPLAY_CORDOBA
-df_ps3 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_cordoba/OGP/player_s_name')
-df_pt3 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_cordoba/OGP/player_t_name')
-df_g3 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_cordoba/OGP/gender_name')
-df_pn3 = spark.read.parquet('/Volumes/boldtproddatalake/boldtdatalake/dwbplay_cordoba/OGP/partner')
+  #Get DW0
+df_ps0 = spark.read.parquet('path/DW0/player_s_name')
+df_pt0 = spark.read.parquet('path/DW0/player_t_name')
+df_g0 = spark.read.parquet('path/DW0/gender_name')
+df_pn0 = spark.read.parquet('path/DW0/partner')
+  #Get DW1
+df_ps1 = spark.read.parquet('path/DW1/player_s_name')
+df_pt1 = spark.read.parquet('path/DW1/player_t_name')
+df_g1 = spark.read.parquet('path/DW1/gender_name')
+df_pn1 = spark.read.parquet('path/DW1/partner')
+  #Get DW2
+df_ps2 = spark.read.parquet('path/DW2/player_s_name')
+df_pt2 = spark.read.parquet('path/DW2/player_t_name')
+df_g2 = spark.read.parquet('path/DW2/gender_name')
+df_pn2 = spark.read.parquet('path/DW2/partner')
+  #Get DW3
+df_ps3 = spark.read.parquet('path/DW3/player_s_name')
+df_pt3 = spark.read.parquet('path/DW3/player_t_name')
+df_g3 = spark.read.parquet('path/DW3/gender_name')
+df_pn3 = spark.read.parquet('path/DW3/partner')
 
 # COMMAND ----------
 
@@ -1046,7 +1047,7 @@ def Diccionario_Player(ps, pt, g, pn):
 
 # COMMAND ----------
 
-def Diccionario_Player_GT(df):
+def Diccionario_Player_DWN(df):
     columns = ["gender", "sexo", "type", "player_type", "status", "player_status", "relacion_player_g_t_s"]
     data	= [("1", "Hombre", "03", "Jugador", "02", "Activo", "46010302"), 
                 ("2", "Mujer", "03", "Jugador", "02", "Activo", "46020302"), 
@@ -1091,9 +1092,9 @@ df_diccionario_players = Diccionario_Player_GT(df_diccionario_players_alira)
 
 # COMMAND ----------
 
-# path_player = 'entprod_mdn.bplay.diccionario_player'
+path_player = 'path.productivo.diccionario_player'
 
-# df_diccionario_players.write \
-#     .mode("overwrite")\
-#         .option("overwriteSchema", "true")\
-#             .saveAsTable(path_player)
+df_diccionario_players.write \
+    .mode("overwrite")\
+        .option("overwriteSchema", "true")\
+            .saveAsTable(path_player)
